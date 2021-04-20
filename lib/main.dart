@@ -26,7 +26,7 @@ class LightsOutGame extends StatefulWidget {
 class _LightsOutGame extends State<LightsOutGame> {
   // Number of possible states for each cell. For the standard lights out game,
   // it is 2 (on/off). Changing states is `(currentState + 1) % numValues`.
-  final int numValues = 4;
+  final int numValues = 2;
   final int gridSize = 5;
   late List<List<int>> gridValues;
 
@@ -67,6 +67,10 @@ class _LightsOutGame extends State<LightsOutGame> {
   }
 
   Container buildCell(int value, int rowIndex, int colIndex) {
+    double minDimension = min(
+        MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
+    double cellDimensions = minDimension / gridSize * 0.9;
+
     Widget content = Text(
       "$value",
       style: TextStyle(
@@ -81,8 +85,8 @@ class _LightsOutGame extends State<LightsOutGame> {
               shape: BoxShape.rectangle,
               border: Border.all(color: Colors.grey, width: 3),
               borderRadius: BorderRadius.all(Radius.zero)),
-          width: 100,
-          height: 100,
+          width: cellDimensions,
+          height: cellDimensions,
           child: AspectRatio(
             aspectRatio: 1,
             child: Text(
