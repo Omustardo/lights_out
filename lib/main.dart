@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -133,13 +131,7 @@ class _LightsOutGame extends State<LightsOutGame> {
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
     double cellDimensions = minDimension / gridSize * 0.9;
 
-    Widget content = Text(
-      "$value",
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 72,
-      ),
-    );
+    Widget content;
     if (numValues == 2) {
       content = Container(
           decoration: BoxDecoration(
@@ -159,6 +151,12 @@ class _LightsOutGame extends State<LightsOutGame> {
               ),
             ),
           ));
+    } else {
+      content = Text("$value",
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 72,
+          ));
     }
 
     return Container(
@@ -168,15 +166,6 @@ class _LightsOutGame extends State<LightsOutGame> {
   }
 
   Row buildRow(List<int> rowValues, int rowIndex) {
-    // if (numValues == 2) {
-    //   return Row(
-    //       children: rowValues
-    //           .map<Container>((value) => Container(
-    //               decoration: BoxDecoration(
-    //                   color: (value == 0) ? Colors.black : Colors.white)))
-    //           .toList());
-    // }
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
