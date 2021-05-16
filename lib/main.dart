@@ -38,6 +38,10 @@ class _LightsOutGame extends State<LightsOutGame> {
     _randomizeBoard();
   }
 
+  // Purely random board generation is not valid as the board will not
+  // always be solvable. Instead, clear the board and then either click or
+  // don't click on each cell with a 50/50 probability. If we can get
+  // to the end state by clicking, it can be solved.
   static List<List<int>> randomGridValues(int gridSize, int numValues) {
     var gridValues =
         new List.generate(gridSize, (_) => List.filled(gridSize, 0));
@@ -45,7 +49,9 @@ class _LightsOutGame extends State<LightsOutGame> {
     var rand = Random();
     for (int i = 0; i < gridSize; i++) {
       for (int j = 0; j < gridSize; j++) {
-        gridValues[i][j] = rand.nextInt(numValues);
+        if (rand.nextBool()) {
+          clickCell(gridValues, i, j, gridSize, numValues);
+        }
       }
     }
     return gridValues;
@@ -57,27 +63,34 @@ class _LightsOutGame extends State<LightsOutGame> {
     });
   }
 
+  // clickCell updates the input gridValues based on clicking at the specified
+  // row and column.
+  static void clickCell(List<List<int>> gridValues, int rowIndex, int colIndex,
+      int gridSize, int numValues) {
+    List<Point<int>> coords = [
+      new Point(rowIndex, colIndex),
+      new Point(rowIndex - 1, colIndex),
+      new Point(rowIndex + 1, colIndex),
+      new Point(rowIndex, colIndex - 1),
+      new Point(rowIndex, colIndex + 1),
+    ];
+
+    coords.forEach((coord) {
+      if ((coord.x < 0 || coord.y < 0) ||
+          (coord.x >= gridSize || coord.y >= gridSize)) {
+        // print("skipping at [$i,$j]");
+        return;
+      }
+      // print("toggling at [$i,$j]");
+      gridValues[coord.x][coord.y] =
+          (gridValues[coord.x][coord.y] + 1) % numValues;
+    });
+  }
+
   void _clickCell(BuildContext context, int rowIndex, int colIndex) {
     setState(() {
       // print("Detected click at [$rowIndex,$colIndex]");
-      List<Point<int>> coords = [
-        new Point(rowIndex, colIndex),
-        new Point(rowIndex - 1, colIndex),
-        new Point(rowIndex + 1, colIndex),
-        new Point(rowIndex, colIndex - 1),
-        new Point(rowIndex, colIndex + 1),
-      ];
-
-      coords.forEach((coord) {
-        if ((coord.x < 0 || coord.y < 0) ||
-            (coord.x >= gridSize || coord.y >= gridSize)) {
-          // print("skipping at [$i,$j]");
-          return;
-        }
-        // print("toggling at [$i,$j]");
-        gridValues[coord.x][coord.y] =
-            (gridValues[coord.x][coord.y] + 1) % numValues;
-      });
+      clickCell(gridValues, rowIndex, colIndex, gridSize, numValues);
 
       if (gameComplete()) {
         print('game over!');
