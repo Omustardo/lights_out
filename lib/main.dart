@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -53,16 +55,26 @@ class _LightsOutGame extends State<LightsOutGame> {
     setState(() {
       // print("Detected click at [$rowIndex,$colIndex]");
 
-      for (int i = rowIndex - 1; i < rowIndex + 2; i++) {
-        for (int j = colIndex - 1; j < colIndex + 2; j++) {
-          if ((i < 0 || j < 0) || (i >= gridSize || j >= gridSize)) {
-            // print("skipping at [$i,$j]");
-            continue;
-          }
-          // print("toggling at [$i,$j]");
-          gridValues[i][j] = (gridValues[i][j] + 1) % numValues;
+      // Inner list is coordinates (always len 2)
+
+      List<Point<int>> coords = [
+        new Point(rowIndex, colIndex),
+        new Point(rowIndex - 1, colIndex),
+        new Point(rowIndex + 1, colIndex),
+        new Point(rowIndex, colIndex - 1),
+        new Point(rowIndex, colIndex + 1),
+      ];
+
+      coords.forEach((coord) {
+        if ((coord.x < 0 || coord.y < 0) ||
+            (coord.x >= gridSize || coord.y >= gridSize)) {
+          // print("skipping at [$i,$j]");
+          return;
         }
-      }
+        // print("toggling at [$i,$j]");
+        gridValues[coord.x][coord.y] =
+            (gridValues[coord.x][coord.y] + 1) % numValues;
+      });
     });
   }
 
