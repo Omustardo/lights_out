@@ -35,7 +35,7 @@ class _LightsOutGame extends State<LightsOutGame> {
   @override
   void initState() {
     super.initState();
-    gridValues = randomGridValues(gridSize, numValues);
+    _randomizeBoard();
   }
 
   static List<List<int>> randomGridValues(int gridSize, int numValues) {
@@ -51,12 +51,15 @@ class _LightsOutGame extends State<LightsOutGame> {
     return gridValues;
   }
 
-  void _clickCell(rowIndex, colIndex) {
+  void _randomizeBoard() {
+    setState(() {
+      gridValues = randomGridValues(gridSize, numValues);
+    });
+  }
+
+  void _clickCell(BuildContext context, int rowIndex, int colIndex) {
     setState(() {
       // print("Detected click at [$rowIndex,$colIndex]");
-
-      // Inner list is coordinates (always len 2)
-
       List<Point<int>> coords = [
         new Point(rowIndex, colIndex),
         new Point(rowIndex - 1, colIndex),
@@ -75,10 +78,44 @@ class _LightsOutGame extends State<LightsOutGame> {
         gridValues[coord.x][coord.y] =
             (gridValues[coord.x][coord.y] + 1) % numValues;
       });
+
+      if (gameComplete()) {
+        print('game over!');
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => AlertDialog(
+                  title: Text("Winner!"),
+                  content: Text("Press OK to start a new game."),
+                  actions: [
+                    TextButton(
+                      child: Text("OK"),
+                      onPressed: () {
+                        // print('pressed newgame button');
+                        _randomizeBoard();
+                        Navigator.of(context).pop(); // Dismiss the button.
+                      },
+                    ),
+                  ],
+                ));
+      }
     });
   }
 
-  Container buildCell(int value, int rowIndex, int colIndex) {
+  bool gameComplete() {
+    int value = gridValues[0][0];
+    for (int i = 0; i < gridValues.length; i++) {
+      for (int j = 0; j < gridValues[i].length; j++) {
+        if (gridValues[i][j] != value) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  Container buildCell(
+      BuildContext context, int value, int rowIndex, int colIndex) {
     double minDimension = min(
         MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
     double cellDimensions = minDimension / gridSize * 0.9;
@@ -113,7 +150,8 @@ class _LightsOutGame extends State<LightsOutGame> {
 
     return Container(
         child: GestureDetector(
-            onTap: () => _clickCell(rowIndex, colIndex), child: content));
+            onTap: () => _clickCell(context, rowIndex, colIndex),
+            child: content));
   }
 
   Row buildRow(List<int> rowValues, int rowIndex) {
@@ -132,7 +170,7 @@ class _LightsOutGame extends State<LightsOutGame> {
       children: rowValues.asMap().entries.map<Container>((columnEntry) {
         int colIndex = columnEntry.key;
         int value = columnEntry.value;
-        return Container(child: buildCell(value, rowIndex, colIndex));
+        return Container(child: buildCell(context, value, rowIndex, colIndex));
       }).toList(),
     );
   }
